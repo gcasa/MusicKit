@@ -12,6 +12,9 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifndef __SNDSTREAMINPUT__
+#define __SNDSTREAMINPUT__
+
 #import <Foundation/Foundation.h>
 #import <SndKit/SndKit.h>
 
@@ -111,3 +114,5 @@
 - didFinishReceivingInput: sender;
 
 @end
+
+#endif
