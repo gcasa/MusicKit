@@ -1,0 +1,35 @@
+# -*- Makefile -*-
+#
+# $Id$
+#
+# GNUmakefile.  Generated from GNUmakefile.in by configure.
+#
+# Build script for the MusicKit on GNUstep systems.
+# See Makefile.in for the build process on MacOS X systems.
+#
+# Leigh Smith <leigh@leighsmith.com>
+#
+# Copyright (c) 2005, The MusicKit Project.  All rights reserved.
+#
+# Permission is granted to use and modify this code for commercial and 
+# non-commercial purposes so long as the author attribution and copyright 
+# messages remain intact and accompany all relevant code.
+#
+
+CONFIG = OTHER_CFLAGS="-DHAVE_CONFIG_H" CONFIGURED_LIBS="-lsndfile -lvorbis -logg -lportaudio -lasound -lpthread " SGMLTRANS="@SGMLTRANS@"
+SUBPROJECTS = Frameworks Utilities Examples Applications
+# TODO: Frameworks Palettes Utilities Examples Applications Documentation
+
+# Packaging info
+PACKAGE_NAME=MusicKit
+PACKAGE_VERSION=5.6.2
+PACKAGE_NEEDS_CONFIGURE=YES
+
+include $(GNUSTEP_MAKEFILES)/common.make
+
+-include GNUmakefile.preamble
+
+include $(GNUSTEP_MAKEFILES)/aggregate.make
+
+-include GNUmakefile.postamble
+

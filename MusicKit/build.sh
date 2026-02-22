@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo "### Build MusicKit..."
+
 # Build DSP Native
 cd Frameworks
 cd MKDSP_Native
@@ -20,3 +22,7 @@ make debug=yes
 cd ../
 cd MusicKit
 make debug=yes
+
+echo "### Done"
+
+exit 0

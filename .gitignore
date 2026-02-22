@@ -7,3 +7,6 @@
 obj
 derived_src
 *.framework
+*.log
+*.status
+*.cache
