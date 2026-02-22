@@ -30,6 +30,7 @@ ifneq (mingw32, $(GNUSTEP_TARGET_OS))
 # The framework to be compiled
   FRAMEWORK_NAME = MKDSP
   MY_NAME = $(FRAMEWORK_NAME)
+  PRODUCT_BUNDLE_IDENTIFIER = org.musickit.MKDSP
 else
   LIBRARY_NAME = libMKDSP
   MY_NAME = $(LIBRARY_NAME)

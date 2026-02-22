@@ -16,9 +16,10 @@
 include $(GNUSTEP_MAKEFILES)/common.make
 
 APP_NAME = ScorePlayer
+PRODUCT_BUNDLE_IDENTIFIER = org.musickit.ScorePlayer
 
 # This is now the ONLY lib you have to include when compiling a MusicKit program.
-ADDITIONAL_TOOL_LIBS += -lMusicKit
+ADDITIONAL_TOOL_LIBS += -lMusicKit -lSndKit
 
 ADDITIONAL_CFLAGS += -g
 ADDITIONAL_LDFLAGS += -g

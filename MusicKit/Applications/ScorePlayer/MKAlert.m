@@ -139,6 +139,7 @@ int mkRunAlertPanel(NSString *title, NSString *s, NSString *first, NSString *sec
         handler = [NSException exceptionWithName: [localException name]
                                           reason: [localException reason]
                                         userInfo: [localException userInfo]];
+        [handler raise];
     } NS_ENDHANDLER
     [panel orderOut: panel];
     return exitValue;

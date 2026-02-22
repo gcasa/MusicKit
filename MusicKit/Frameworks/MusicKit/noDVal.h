@@ -65,13 +65,7 @@
   @see MKIsNoDVal().
   @ingroup NoDValFns
 */
-inline double MKGetNoDVal(void)
-{
-    union {double d; int i[2];} u;
-    u.i[0] = _MK_NANHI;
-    u.i[1] = _MK_NANLO;
-    return u.d;
-}
+double MKGetNoDVal(void);
 
 /*!
   @brief Compares value to see if it is the special NaN that the MusicKit uses to signal "no value".
@@ -88,12 +82,7 @@ inline double MKGetNoDVal(void)
   @return Returns an int.
   @ingroup NoDValFns
 */
-inline int MKIsNoDVal(double value)
-{
-    union {double d; int i[2];} u;
-    u.d = value;
-    return (u.i[0] == _MK_NANHI); /* Don't bother to check low bits. */
-}
+int MKIsNoDVal(double value);
 
 /*!
   @brief  Special <i>double</i> value that means "invalid value."

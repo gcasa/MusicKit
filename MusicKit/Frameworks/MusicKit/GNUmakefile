@@ -27,6 +27,7 @@ ifneq (mingw32, $(GNUSTEP_TARGET_OS))
 # The framework to be compiled
   FRAMEWORK_NAME = MusicKit
   MY_NAME = $(FRAMEWORK_NAME)
+  PRODUCT_BUNDLE_IDENTIFIER = org.musickit.MusicKit
 else
   LIBRARY_NAME = libMusicKit
   MY_NAME = $(LIBRARY_NAME)
@@ -59,7 +60,7 @@ $(MY_NAME)_OBJC_FILES = \
           tokenNames.m utilities.m writeBinary.m writeMidi.m\
           writeScore.m MKPatch.m mtcConductor.m
 
-$(MY_NAME)_C_FILES = fastFFT.c trigonometry.c
+$(MY_NAME)_C_FILES = fastFFT.c trigonometry.c noDVal.c
 
 # The framework installed header files
 $(MY_NAME)_HEADER_FILES = \
