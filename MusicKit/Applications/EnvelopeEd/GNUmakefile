@@ -16,6 +16,7 @@
 include $(GNUSTEP_MAKEFILES)/common.make
 
 APP_NAME = EnvelopeEd
+PRODUCT_BUNDLE_IDENTIFIER = org.musickit.EnvelopeEd
 
 APPICON = EnvelopeEd.tiff
 

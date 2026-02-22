@@ -31,6 +31,7 @@ srcdir = .
 ifneq ($(GNUSTEP_TARGET_OS), mingw32)
   FRAMEWORK_NAME = MKPerformSndMIDI
   MY_NAME = $(FRAMEWORK_NAME)
+  PRODUCT_BUNDLE_IDENTIFIER = org.musickit.MKPerformSndMIDI
 else
   LIBRARY_NAME = libMKPerformSndMIDI
   MY_NAME = $(LIBRARY_NAME)

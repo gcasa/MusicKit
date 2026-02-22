@@ -20,6 +20,7 @@ include $(GNUSTEP_MAKEFILES)/common.make
 
 APP_NAME = \
 	Spectro	
+PRODUCT_BUNDLE_IDENTIFIER = org.musickit.Spectro
 ADDITIONAL_LIB_DIRS =
 
 PACKAGE_NAME=Spectro

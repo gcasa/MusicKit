@@ -16,6 +16,7 @@
 include $(GNUSTEP_MAKEFILES)/common.make
 
 APP_NAME = PianoRoll
+PRODUCT_BUNDLE_IDENTIFIER = org.musickit.PianoRoll
 
 # This is now the ONLY lib you have to include when compiling a MusicKit program.
 ADDITIONAL_TOOL_LIBS += -lMusicKit

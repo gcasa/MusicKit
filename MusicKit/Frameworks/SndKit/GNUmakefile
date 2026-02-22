@@ -38,6 +38,7 @@ ifeq (mingw32, $(GNUSTEP_TARGET_OS))
 else
   FRAMEWORK_NAME = SndKit
   MY_NAME=$(FRAMEWORK_NAME)
+  PRODUCT_BUNDLE_IDENTIFIER = org.musickit.SndKit
 endif
 
 # The framework resource files and directories

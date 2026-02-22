@@ -27,6 +27,7 @@ ifneq (mingw32, $(GNUSTEP_TARGET_OS))
 # The framework to be compiled
   FRAMEWORK_NAME = MusicKit
   MY_NAME = $(FRAMEWORK_NAME)
+  PRODUCT_BUNDLE_IDENTIFIER = org.musickit.MusicKit
 else
   LIBRARY_NAME = libMusicKit
   MY_NAME = $(LIBRARY_NAME)

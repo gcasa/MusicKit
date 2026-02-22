@@ -19,6 +19,7 @@
 include $(GNUSTEP_MAKEFILES)/common.make
 
 APP_NAME = TwoWaves	
+PRODUCT_BUNDLE_IDENTIFIER = org.musickit.TwoWaves
 ADDITIONAL_LIB_DIRS =
 
 PACKAGE_NAME=TwoWaves
