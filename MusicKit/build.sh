@@ -29,6 +29,12 @@ cd MusicKit
 make debug=yes
 sudo ./install.sh
 
+# Build all Applications
+cd ../
+cd Applications
+make debug=yes
+sudo ./install.sh
+
 echo "### Done"
 
 exit 0
