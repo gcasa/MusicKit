@@ -11,14 +11,14 @@ make debug=yes
 sudo ./install.sh
 
 # Build portaudio MIDI
-cd ..
+cd ../
 cd PlatformDependent
 cd MKPerformSndMIDI_portaudio
 make debug=yes
 sudo ./install.sh
 
 # Build SndKit
-cd ../..
+cd ../../
 cd SndKit
 make debug=yes
 sudo ./install.sh
@@ -29,8 +29,8 @@ cd MusicKit
 make debug=yes
 sudo ./install.sh
 
-# Build all Applications
-cd ../
+# Build all Applications\
+cd ../../
 cd Applications
 make debug=yes
 sudo ./install.sh
