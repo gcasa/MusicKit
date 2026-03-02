@@ -43,7 +43,7 @@ enum args { sclA, iadr};
 {
     return YES;
 }
-#endif _MK_UGOPTIMIZE
+#endif /* _MK_UGOPTIMIZE */
 
 extern DSPFix48 *_MKCurSample(id orch);
 

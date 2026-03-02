@@ -37,7 +37,7 @@ enum args { i1adr, scale1, aout, i2adr, switchdelay};
 {
     return (arg != switchdelay);
 }
-#endif _MK_UGOPTIMIZE
+#endif /* _MK_UGOPTIMIZE */
 
 -idleSelf
   /* Patches output to sink. */

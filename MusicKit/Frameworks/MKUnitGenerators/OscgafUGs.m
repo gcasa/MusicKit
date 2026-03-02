@@ -107,14 +107,14 @@ typedef enum _args { aina, atab, inc, ainf, aout, mtab, phs} args;
 //NXLocalStringFromTableInBundle(_MK_ERRTAB,_MKErrorBundle(),"Oscgaf Wavetable","Wavetable","This string occurs in the context of a larger error message: 'Wavetable must be set before running...' This error is rarely if ever seen by the user")
 
 #define MK_OSCFREQSCALE 256.0 /* Used by Oscg and Oscgaf */
-/* #import "MKUnitGenerators.h" /* Has MK_OSCFREQSCALE */ 
+/* #import "MKUnitGenerators.h" */
 
 #if _MK_UGOPTIMIZE 
 +(BOOL)shouldOptimize:(unsigned) arg
 {
     return (arg != phs);
 }
-#endif _MK_UGOPTIMIZE
+#endif /* _MK_UGOPTIMIZE */
 
 #define FREQSCALE  ((double)(MK_OSCFREQSCALE * TWO_TO_M_23))
 
@@ -332,8 +332,9 @@ typedef enum _args { aina, atab, inc, ainf, aout, mtab, phs} args;
 		   synthData for:anObj type:MK_oscTable];
                   [synthData release];/* added to shared table, above */
 	      }
-	      else if (MKIsTraced(MK_TRACEUNITGENERATOR)) /* daj */
+	      else if (MKIsTraced(MK_TRACEUNITGENERATOR)) { /* daj */
 		fprintf(stderr,"Insufficient wavetable memory at time %.3f. \n",MKGetTime());
+	      }
 	}
 	_table = synthData;
     }

@@ -16,10 +16,6 @@ Modification history:
 	<b> = space of input
 	<c> = space of delay line
 */	
-{
-    id memObj;      /* Delay memory */
-    int len;        /* Length (LEQ length of memObj). */
-}
 
 enum args { aout, pdel, ainp, mod };
 
@@ -62,11 +58,10 @@ enum args { aout, pdel, ainp, mod };
    * It is up to the caller to insure the memory is cleared. 
    */
 {
-    int memObjAddr;
     BOOL isModulus = YES;
     if (!aDspMemoryObj || !(isModulus = [aDspMemoryObj isModulus])) {
 	MKOrchMemSegment seg;
-	DSPMemorySpace spc = [(id)self->isa argSpace:pdel];
+	DSPMemorySpace spc = [(id)object_getClass(self) argSpace:pdel];
 	if (spc == DSP_MS_X)
 	  seg = MK_xData;
 	else seg = MK_yData;
@@ -121,7 +116,7 @@ enum args { aout, pdel, ainp, mod };
 {
     if (!memObj || (len <= offset))
       return nil;
-    MKSetUGAddressArgToInt(self,pdel,offset + [memObj address]);
+    MKSetUGAddressArgToInt(self,pdel,offset + [(MKSynthData *)memObj address]);
     return self;
 }
 

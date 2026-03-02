@@ -26,6 +26,7 @@
   Portions Copyright (c) 1994 NeXT Computer, Inc. and reproduced under license from NeXT
   Portions Copyright (c) 1994 Stanford University
 */
+
 /* 
   Modification history:
   $Log$
@@ -60,11 +61,16 @@
   6/12/93/daj -  Removed define of MK_INLINE
   9/25/93/daj -  Updated for new typed sharedSynthInfo
   */
+#import <Foundation/Foundation.h>
 #import <MusicKit/MusicKit.h>
 #import "_exportedPrivateMusickit.h"
 #import "_unitGeneratorInclude.h"
 #import <SndKit/SndKit.h>
 #import "OscgUG.h"
+
+@interface NSObject (SoundMethods)
+- (int)sampleCount;
+@end
 
 @implementation OscgUG:MKUnitGenerator
 
@@ -82,7 +88,7 @@ enum _args { atab, mtab, amp, aout, inc, phs};
 {
     return (arg != phs);
 }
-#endif _MK_UGOPTIMIZE
+#endif /* _MK_UGOPTIMIZE */
 
 -init
 {
@@ -206,7 +212,7 @@ enum _args { atab, mtab, amp, aout, inc, phs};
 	}
 	return 512;             /* 16 < */
     }
-    else if ([anObj respondsTo:@selector(length)])
+    else if ([anObj respondsToSelector:@selector(length)])
       return (int)[anObj length];
     else return 512;
 }
@@ -220,7 +226,7 @@ enum _args { atab, mtab, amp, aout, inc, phs};
       return 256;
     else if ([anObj isKindOfClass: _MKClassSamples()])
       return [[anObj sound] sampleCount];
-    else if ([anObj respondsTo:@selector(length)])
+    else if ([anObj respondsToSelector:@selector(length)])
       return (int)[anObj length];
     else return 256;
 }
@@ -296,8 +302,9 @@ enum _args { atab, mtab, amp, aout, inc, phs};
 		  [orchestra installSharedSynthDataWithSegmentAndLength:
 		   synthData for:anObj type:MK_oscTable];
 	      }
-	      else if (MKIsTraced(MK_TRACEUNITGENERATOR)) /* daj */
+	      else if (MKIsTraced(MK_TRACEUNITGENERATOR)) { /* daj */
 		fprintf(stderr,"Insufficient wavetable memory at time %.3f. \n",MKGetTime());
+	      }
 	}
 	_table = synthData;
     }

@@ -23,10 +23,6 @@ Modification history:
 	<b> = space of input
 	<c> = space of delay line
 */	
-{
-    id memObj;      /* Delay memory */
-    int len;   /* Length (LEQ length of memObj). */
-}
 
 enum args { ainp, aout, pdel, adel, edel};
 
@@ -38,7 +34,7 @@ enum args { ainp, aout, pdel, adel, edel};
 {
     return (arg != pdel);
 }
-#endif _MK_UGOPTIMIZE
+#endif /* _MK_UGOPTIMIZE */
 
 -init
 {
@@ -84,7 +80,7 @@ enum args { ainp, aout, pdel, adel, edel};
     int memObjAddr;
     if (!aDspMemoryObj) {
 	MKOrchMemSegment seg;
-	DSPMemorySpace spc = [(id)self->isa argSpace:adel];
+	DSPMemorySpace spc = [(id)object_getClass(self) argSpace:adel];
 	if (spc == DSP_MS_X)
 	  seg = MK_xPatch;
 	else seg = MK_yPatch;
@@ -94,7 +90,7 @@ enum args { ainp, aout, pdel, adel, edel};
     len = [aDspMemoryObj length];
     [orchestra beginAtomicSection];
     MKSetUGAddressArg(self,adel,aDspMemoryObj);
-    memObjAddr = [aDspMemoryObj address];
+    memObjAddr = [(MKSynthData *)aDspMemoryObj address];
     MKSetUGAddressArgToInt(self,pdel,memObjAddr);
     MKSetUGAddressArgToInt(self,edel,memObjAddr + len);
     [orchestra endAtomicSection];
@@ -118,7 +114,7 @@ enum args { ainp, aout, pdel, adel, edel};
     if (!memObj || ([memObj length] < newLength))
       return nil;
     len = newLength; 
-    MKSetUGAddressArgToInt(self,edel,newLength + [memObj address]);
+    MKSetUGAddressArgToInt(self,edel,newLength + [(MKSynthData *)memObj address]);
     return self;
 }
 
@@ -129,7 +125,7 @@ enum args { ainp, aout, pdel, adel, edel};
 {
     if (!memObj)
       return nil;
-    MKSetUGAddressArgToInt(self,pdel,[memObj address]);
+    MKSetUGAddressArgToInt(self,pdel,[(MKSynthData *)memObj address]);
     return self;
 }
 
@@ -141,7 +137,7 @@ enum args { ainp, aout, pdel, adel, edel};
 {
     if (!memObj || (len <= offset))
       return nil;
-    MKSetUGAddressArgToInt(self,pdel,offset + [memObj address]);
+    MKSetUGAddressArgToInt(self,pdel,offset + [(MKSynthData *)memObj address]);
     return self;
 }
 

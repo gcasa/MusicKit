@@ -37,7 +37,7 @@ enum args { i1adr, i1gin, aout, i2adr, i2gin};
 {
     return YES;
 }
-#endif _MK_UGOPTIMIZE
+#endif /* _MK_UGOPTIMIZE */
 
 -idleSelf
   /* Sets output to write to sink. */

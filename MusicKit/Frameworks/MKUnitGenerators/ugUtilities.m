@@ -7,12 +7,21 @@
 
 #import <MusicKit/MusicKit.h>
 
-#import "AsympUG.h"
-#import "AsympUGx.h"
-#import "AsympUGy.h"
-#import "AsympenvUG.h"
-#import "AsympenvUGx.h"
-#import "AsympenvUGy.h"
+// #import "AsympUG.h"
+// #import "AsympUGx.h"
+// #import "AsympUGy.h"
+// #import "AsympenvUG.h"
+// #import "AsympenvUGx.h"
+// #import "AsympenvUGy.h"
+
+@interface NSObject (AsympMethods)
+- (void)setEnvelope:(id)env yScale:(double)ys yOffset:(double)yo xScale:(double)xs releaseXScale:(double)rxs funcPtr:(void*)fp;
+- (void)resetEnvelope:(id)env yScale:(double)ys yOffset:(double)yo xScale:(double)xs releaseXScale:(double)rxs funcPtr:(void*)fp transitionTime:(double)tt;
+- (id)envelope;
+- (void)setYScale:(double)ys yOffset:(double)yo;
+- (void)setReleaseXScale:(double)rxs;
+- (void)setConstant:(double)c;
+@end
 
 /* Public utilities */
 
@@ -79,12 +88,14 @@ void MKUpdateAsymp (id asymp, id envelope, double val0, double val1,
 		 attScl releaseXScale:relScl funcPtr:NULL transitionTime:
 		 portamentoTime];
 		break;
+	      default:
+		break;
 	    }
 	    return;
 	}
     }
     else {     /* Status > MK_phraseRearticulate */
-	if (envelope = [asymp envelope]) {   /* Don't require env passed here*/
+	if ((envelope = [asymp envelope])) {   /* Don't require env passed here*/
 	    if (!MKIsNoDVal(val1) || !MKIsNoDVal(val0)) {
 		/* In this case we allow reset of scale and offset */
 		if (!MKIsNoDVal(val0) && !MKIsNoDVal(val1))
@@ -118,15 +129,15 @@ void MKUpdateAsymp (id asymp, id envelope, double val0, double val1,
 
 static BOOL useRealTimeEnvelopes = NO;
 
-id MKAsympUGxClass(void)
-{
-    return (useRealTimeEnvelopes) ? [AsympenvUGx class] : [AsympUGx class];
-}
+// id MKAsympUGxClass(void)
+// {
+//     return (useRealTimeEnvelopes) ? [AsympenvUGx class] : [AsympUGx class];
+// }
 
-id MKAsympUGyClass(void)
-{
-    return (useRealTimeEnvelopes) ? [AsympenvUGy class] : [AsympUGy class];
-}
+// id MKAsympUGyClass(void)
+// {
+//     return (useRealTimeEnvelopes) ? [AsympenvUGy class] : [AsympUGy class];
+// }
 
 void MKUseRealTimeEnvelopes(BOOL yesOrNo)
 {
@@ -141,7 +152,7 @@ BOOL MKIsUsingRealTimeEnvelopes(void)
 
 /* Private utilities */
 
-static inline double log2(double x)
+static inline double my_log2(double x)
 {
   return log(x)/log(2.0);
 }
@@ -160,7 +171,7 @@ BOOL _MKUGIsPowerOf2 (int n)
       i *= 2;
   }
 #endif
-  return (fabs(modf(log2((double)n)+.0000001,&y)) < .000001);
+  return (fabs(modf(my_log2((double)n)+.0000001,&y)) < .000001);
 }
 
 int _MKUGNextPowerOf2(int n)
@@ -175,7 +186,7 @@ int _MKUGNextPowerOf2(int n)
     return i;
 #else
     double y;
-    double logN = log2((double)n)+.0000001; /* +eps necessary ! */
+    double logN = my_log2((double)n)+.0000001; /* +eps necessary ! */
     if (fabs(modf(logN ,&y)) < 0.000001)
       return n;
     return (int)pow(2.0,(double)(((int)logN)+1));

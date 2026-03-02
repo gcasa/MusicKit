@@ -16,6 +16,7 @@
   Portions Copyright (c) 1994 NeXT Computer, Inc. and reproduced under license from NeXT
   Portions Copyright (c) 1994 Stanford University
 */
+
 /* 
 Modification history:
   $Log$
@@ -28,12 +29,18 @@ Modification history:
                  table segment.
 
 */
+#import <Foundation/Foundation.h>
 #import <MusicKit/MusicKit.h>
 #import "_exportedPrivateMusickit.h"
 #import <SndKit/SndKit.h>
 #import "OscgafUG.h"
 
-@implementation OscgafUG:OscgafUGs
+
+@interface NSObject (SoundMethods)
+- (int)sampleCount;
+@end
+
+@implementation OscgafUG // : OscgafUGs
 
 typedef enum _args { aina, atab, inc, ainf, aout, mtab, phs} args;
 #import "oscgafUGInclude.m"
@@ -53,7 +60,7 @@ typedef enum _args { aina, atab, inc, ainf, aout, mtab, phs} args;
     }
     return 512;             /* 16 < */
   }
-  else if ([anObj respondsTo:@selector(length)])
+  else if ([anObj respondsToSelector:@selector(length)])
     return (int)[anObj length];
   else return 256;
 }
@@ -67,7 +74,7 @@ typedef enum _args { aina, atab, inc, ainf, aout, mtab, phs} args;
     return 256;
   else if ([anObj isKindOfClass: _MKClassSamples()])
     return [[anObj sound] sampleCount];
-  else if ([anObj respondsTo:@selector(length)])
+  else if ([anObj respondsToSelector:@selector(length)])
     return (int)[anObj length];
   else return 256;
 }

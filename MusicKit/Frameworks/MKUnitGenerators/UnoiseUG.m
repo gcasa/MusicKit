@@ -34,7 +34,7 @@ enum args { aout, seed};
 {
     return (arg != seed);
 }
-#endif _MK_UGOPTIMIZE
+#endif /* _MK_UGOPTIMIZE */
 
 -idleSelf
 {

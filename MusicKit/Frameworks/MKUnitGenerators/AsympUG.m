@@ -52,6 +52,7 @@ Modification history:
 
 // #define INLINE_MATH 1 /* Workaround for exp() bug. */
 #import <MusicKit/MusicKit.h>
+
 #import "_exportedPrivateMusickit.h"
 #import "_unitGeneratorInclude.h"
 
@@ -61,7 +62,7 @@ Modification history:
 //#define  MAX(A,B)	((A) > (B) ? (A) : (B))
 //#endif
 
-@implementation AsympUG:MKUnitGenerator
+@implementation AsympUG // : MKUnitGenerator
 /* Asymptotic ramper for writing to patch points.
    This may be used as a simple ramper but also contains
    support for sending an envelope to the DSP incrementally.
@@ -85,40 +86,9 @@ Modification history:
  * *          value of useInitialvalue).
  * * 	t0 is ignored. 	
  */
-{
-    id anEnv;                     /* The envelope, if any. */
-    double (*scalingFunc)();      /* scalingFunc is a double-valued scaling
-				     function of two arguments:
-				     the current double value
-				     and the UnitGenerator instance id.
-				     If funPtr is NULL,
-				     the identity mapping is used. */
-    int envelopeStatus;           /* Status of last envelope point accessed.
-				     I.e. if we just set the target which  
-				     is the stickpoint, envelopeStatus is
-				     MK_stickPoint. */
-    int arrivalStatus;            /* Status of actual progression on the
-				     DSP. I.e. if we have already interrupted
-				     the trajectory to the stickpoint,
-				     arrivalStatus is MK_stickPoint. */
-    double timeScale;             /* time scaling. The time constants are
-				     scaled as well. */
-    double releaseTimeScale;      /* For the post-stick-point segment. */
-    double yScale;                /* Y scale */
-    double yOffset;               /* Y offset */
-    double targetX;               /* X value of current target. */
-    char useInitialValue;         /* Controls whether initial value of
-				     envelope is used. */
-    int curPt;                    /* Current envelope point. */
-    double _reservedAsymp1;
-    MKMsgStruct * _reservedAsymp2;
-    double _reservedAsymp3;
-    double _reservedAsymp4;
-    double _reservedAsymp5;
-    double _reservedAsymp6;
-    double _reservedAsymp7;
-    DSPDatum _reservedAsymp8;
-}
+
+// Remove uneeded ivars...
+
 enum _args { aout, trg, rate, amp};
 
 #define _tScale _reservedAsymp1
@@ -137,7 +107,7 @@ enum _args { aout, trg, rate, amp};
 {
     return (arg != amp);
 }
-#endif _MK_UGOPTIMIZE
+#endif /* _MK_UGOPTIMIZE */
 
 /* T48COEFF times the "time constant" gives time to decay 48dB exponentially */
 // #define T48COEFF 5.25
@@ -567,7 +537,7 @@ static id setT60(AsympUG *self,double seconds)
   /* Private method which implements the next point in the envelope.
      We always read one point ahead. */
 {
-    double curX,scaledDeltaX,smoothVal,v;
+    double curX,scaledDeltaX,smoothVal;
     /* envelopeStatus is the status of point where we think we're arriving. */
 
     switch (envelopeStatus) { /* The point at which we think we're arriving.

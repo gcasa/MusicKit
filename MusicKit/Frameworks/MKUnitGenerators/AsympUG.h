@@ -208,7 +208,7 @@ provided by AsympUG, but not by AsympenvUG.</li>
 
 #import <MusicKit/MusicKit.h>
 
-@interface AsympUG: MKUnitGenerator
+@interface AsympUG : MKUnitGenerator
 {
     id anEnv;
     double (*scalingFunc)();

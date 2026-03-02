@@ -7,7 +7,9 @@ Modification history:
 
 */
 #import <MusicKit/MusicKit.h>
-#import <MusicKit/ArielQP.h>
+#ifndef GNUSTEP
+#import <MusicKit/ArielQP.h>  // Not available in GNUstep
+#endif
 #import "_unitGeneratorInclude.h"
 #import "_exportedPrivateMusickit.h"
 
@@ -19,10 +21,6 @@ Modification history:
 	<a> = space of output
 	<b> = space of input
 */	
-{
-    int memAddr; 
-    int len;   
-}
 
 enum args { ainp, aout, pdel, adel, edel};
 
@@ -48,7 +46,7 @@ enum args { ainp, aout, pdel, adel, edel};
   /* Patches output and delay memory to sink. */
 {
     [self setAddressArgToSink:aout];
-    [self setDelayAddress:MK_DRAM_SINK length:1];
+    [self setDelayAddress:0 length:1];
     return self;
 }
 

@@ -8,6 +8,7 @@
 
   Copyright 1993, CCRMA. Stanford University.  All rights reserved.
 */
+
 /*
 Modification history:
   $Log$
@@ -20,17 +21,18 @@ Modification history:
 
   3/10/93/daj - Created
 */
+#import <Foundation/Foundation.h>
 #import <MusicKit/MusicKit.h>
 #import "_unitGeneratorInclude.h"
 #import "_exportedPrivateMusickit.h"
 #import <MKDSP/dsp_memory_map.h>
+
+@interface NSObject (OrchestraMethods)
+- (int)outputChannelOffset;
+@end
 #import "In1qpUG.h"
 
 @implementation In1qpUG:MKUnitGenerator
-{
-    int qpSatellite;
-    BOOL _set;
-}
 
 enum args { chan, scl, dspptr, oadr, skip };
 
@@ -52,7 +54,7 @@ enum args { chan, scl, dspptr, oadr, skip };
     /* First account for devices such as AD64x that have 
      * an extra zero between channels
      */
-    aChan *= [orchestra outputChannelOffset];
+    aChan *= (int)[orchestra outputChannelOffset];
     return [self setDatumArg:chan to:aChan];
 }
 

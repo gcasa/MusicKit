@@ -24,7 +24,7 @@ enum args { i1adr, i2adr, aout, i3adr};
 {
     return YES;
 }
-#endif _MK_UGOPTIMIZE
+#endif /* _MK_UGOPTIMIZE */
 
 -setInput1:aPatchPoint
 /* Set first input to specified patchPoint. */

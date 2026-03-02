@@ -36,7 +36,6 @@
 */
 
 #import <MusicKit/MusicKit.h>
-#import <objc/List.h> /*sb: for List */
 #import "_exportedPrivateMusickit.h"
 #import "AsympenvUG.h"
 
@@ -46,24 +45,46 @@
 
 #define EQU(_x,_y) ((_x>_y)?(_x-_y<.0001):(_y-_x<.0001))
 
-@interface _EnvKey:List {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wobjc-multiple-method-names"
+
+@interface _EnvKey:NSObject {
     double yScale;
     double yOffset;
     double timeScale;
     double releaseTimeScale;
     void *func;
     id env;
+    NSMutableArray *objects;
 } 
 -(void)_setVals:(double)ys :(double)yOff :(double)tScale 
   :(double)releaseTScale :(void *)fnc :e;
 -(void)_getVals:(double *)ys :(double *)yOff :(double *)tScale 
   :(double *)releaseTScale :(void **)fnc :(id *)e;
 -(id)_envelope;
--(unsigned)hash;
+-(NSUInteger)hash;
 -(BOOL)isEqual:obj;
+-(void)addObject:(id)anObject;
+-(id)objectAt:(NSUInteger)index;
+-(void)empty;
 @end
 
+#pragma clang diagnostic pop
+
 @implementation _EnvKey 
+
+- (id) init {
+    self = [super init];
+    if (self) {
+        objects = [[NSMutableArray alloc] init];
+    }
+    return self;
+}
+
+- (void) dealloc {
+    [objects release];
+    [super dealloc];
+} 
 
 -(void)_getVals:(double *)ys :(double *)yOff :(double *)tScale 
   :(double *)releaseTScale :(void **)fnc :(id *)e
@@ -91,7 +112,7 @@
     env = e;
 }
   
--(unsigned)hash {
+-(NSUInteger)hash {
     return [env hash];
 }
 
@@ -104,6 +125,18 @@
     return ((e == env) && EQU(ys,yScale) && EQU(yOff,yOffset) &&
 	    EQU(tScale,timeScale) && EQU(releaseTScale,releaseTimeScale) &&
 	    (fnc == func));
+}
+
+-(void)addObject:(id)anObject {
+    [objects addObject:anObject];
+}
+
+-(id)objectAt:(NSUInteger)index {
+    return [objects objectAtIndex:index];
+}
+
+-(void)empty {
+    [objects removeAllObjects];
 }
 
 @end
@@ -159,7 +192,7 @@ enum args { antrg, aout, rate, trg, andur, anrate, dur, val };
     return self;
 }
 
-static id clockConductor = nil;
+// static id clockConductor = nil;
 
 -init
 {
@@ -234,7 +267,7 @@ static double smoothingToRate(AsympenvUG *self,double smoothingVal)
     return releaseTime;
 }
 
-static id keyHashTable = nil;
+static NSMutableDictionary *keyHashTable = nil;
 static id lookupObj = nil; /* Reusable lookup obj */
 
 static id findKeyObjFor(double yScale,double yOffset,double timeScale,
@@ -242,23 +275,23 @@ static id findKeyObjFor(double yScale,double yOffset,double timeScale,
 {
     id valObj;
     if (!keyHashTable)
-      keyHashTable = [[HashTable alloc] init];
+      keyHashTable = [[NSMutableDictionary alloc] init];
     if (!lookupObj)
       lookupObj = [[_EnvKey alloc] init];
     [lookupObj _setVals:yScale :yOffset :timeScale :releaseTimeScale :func :env];
-    valObj = [keyHashTable valueForKey:lookupObj];
+    valObj = [keyHashTable objectForKey:lookupObj];
     if (valObj) 
       return valObj;
     valObj = lookupObj;
     lookupObj = nil;
-    [keyHashTable insertKey:valObj value:valObj];
-    [valObj addObject:[Object alloc]]; /* Just dummy unique objects */
-    [valObj addObject:[Object alloc]];
-    [valObj addObject:[Object alloc]];
+    [keyHashTable setObject:valObj forKey:valObj];
+    [valObj addObject:[NSObject alloc]]; /* Just dummy unique objects */
+    [valObj addObject:[NSObject alloc]];
+    [valObj addObject:[NSObject alloc]];
     return valObj;
 }
 
-static id lostObjectList = nil;
+// static NSMutableArray *lostObjectList = nil;
 /* 
  * We can't free the alloc objects because they are keys in
  * the shared object table
@@ -270,30 +303,12 @@ static id lostObjectList = nil;
    * But we can't free them until the Orchestra is closed.
    */
 {
-//    unsigned int count = 0; 
-    const   void  *key; 
-    void  *value; 
-    NXHashState  state = [keyHashTable initState]; 
-    id valObj;
-    if (!lostObjectList)
-      lostObjectList = [[List alloc] init];
-    while ([keyHashTable nextState: &state key: &key value: &value]) {
-	valObj = (id)key;
-	if ([valObj _envelope] == env) {
-	    [lostObjectList addObject:[valObj objectAt:0]];
-	    [lostObjectList addObject:[valObj objectAt:1]];
-	    [lostObjectList addObject:[valObj objectAt:2]];
-	    [valObj empty];
-	    [valObj addObject:[Object alloc]]; 
-	    [valObj addObject:[Object alloc]];
-	    [valObj addObject:[Object alloc]];
-	}
-    }
+    // Commented out due to old HashTable and List classes not available in GNUstep
+    // Original code used NXHashState and List
 }
 
 +(void)freeKeyObjects {
-    [lostObjectList freeObjects];
-    [lostObjectList empty];
+    // Commented out due to old List class
 }
 
 -setEnvelope:anEnvelope yScale:(double)yScaleVal yOffset:(double)yOffsetVal
@@ -302,7 +317,7 @@ static id lostObjectList = nil;
   /* Inits envelope handler with the values specified. func is described above.
    */
 {
-    int i,arrCount,count,j,k;
+    int i,arrCount,count,j;
     id keyObj;
     double *xArray;
     double *yArray;
@@ -598,7 +613,7 @@ static id setT60(AsympenvUG *self,double seconds)
      MKSetPreemptDuration(). */
 {
     int nPts,endOffset;
-    double lastVal,dummy1,dummy2;
+    double lastVal = 0.0;
     if (!anEnv || status == MK_idle)
       return self;
     nPts = [anEnv pointCount];

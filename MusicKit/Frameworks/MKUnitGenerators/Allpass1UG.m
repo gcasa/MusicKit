@@ -24,7 +24,7 @@ enum args { ainp, bb0, aout, s};
 {
     return (arg != s);
 }
-#endif _MK_UGOPTIMIZE
+#endif /* _MK_UGOPTIMIZE */
 
 -idleSelf
   /* Patches output to sink. */
