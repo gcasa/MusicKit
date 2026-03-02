@@ -346,7 +346,9 @@ int main(int argc, char *argv[])
 		MKSetTrace(atoi(optarg));
 		break;
 	    case 'v':
+#ifndef GNUSTEP
 		DSPEnableErrorFile("/dev/tty");
+#endif
 		break;
 	    case 'w':
 		outputFile = [[NSString stringWithUTF8String: optarg] stringByAppendingPathExtension: SOUND_EXTENSION];
