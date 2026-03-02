@@ -7,7 +7,8 @@ include $(GNUSTEP_MAKEFILES)/common.make
 
 FRAMEWORK_NAME = MKUnitGenerators
 
-MKUnitGenerators_OBJC_FILES = AsympUG.m \
+MKUnitGenerators_OBJC_FILES = \
+	AsympUG.m \
 	AsympenvUG.m \
 	Allpass1UG.m \
 	BiquadUG.m \
@@ -41,7 +42,47 @@ MKUnitGenerators_OBJC_FILES = AsympUG.m \
 	SnoiseUG.m \
 	Scl1add2UG.m \
 	ugUtilities.m \
-	UnoiseUG.m 
+	UnoiseUG.m
+
+MKUnitGenerators_HEADER_FILES = \
+	Add2UG.h \
+	Allpass1UG.h \
+	AsympenvUG.h \
+	AsympUG.h \
+	BiquadUG.h \
+	ConstantUG.h \
+	DelaymUG.h \
+	DelayqpUG.h \
+	DelayUG.h \
+	DswitchtUG.h \
+	DswitchUG.h \
+	EnvFollowUG.h \
+	_exportedPrivateMusickit.h \
+	In1aUG.h \
+	In1bUG.h \
+	In1qpUG.h \
+	InterpUG.h \
+	MKUnitGenerators.h \
+	Mul1add2UG.h \
+	Mul2UG.h \
+	OnepoleUG.h \
+	OnezeroUG.h \
+	OscgafiUG.h \
+	OscgafUG.h \
+	OscgafUGs.h \
+	OscgUG.h \
+	Out1aUG.h \
+	Out1bUG.h \
+	Out1nUG.h \
+	Out2sumUG.h \
+	ScaleUG.h \
+	Scl1add2UG.h \
+	Scl2add2UG.h \
+	SnoiseUG.h \
+	TablookiUG.h \
+	timings.h \
+	_unitGeneratorInclude.h \
+	UnoiseUG.h
 
 MKUnitGenerators_RESOURCE_FILES = RealityFailure \
 	MKUnitGeneratorsInfo.plist 
