@@ -85,7 +85,7 @@ MKUnitGenerators_HEADER_FILES = \
 	UnoiseUG.h
 
 MKUnitGenerators_RESOURCE_FILES = RealityFailure \
-	MKUnitGeneratorsInfo.plist 
+	MKUnitGenerators-Info.plist 
 
 -include GNUmakefile.preamble
 include $(GNUSTEP_MAKEFILES)/common.make

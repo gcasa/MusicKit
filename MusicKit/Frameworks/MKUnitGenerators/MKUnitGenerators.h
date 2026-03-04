@@ -31,6 +31,7 @@
 
 #import <MusicKit/MusicKit.h>
 
+#ifndef GNUSTEP
 /* Allpass1UG - from dsp macro allpass1. See Allpass1UG.h for details. */
 #import "Allpass1UGxx.h"
 #import "Allpass1UGxy.h"
@@ -262,8 +263,10 @@
 #import "UnoiseUGx.h" 
 #import "UnoiseUGy.h"
 
+#endif // GNUSTEP
+
 #define MK_OSCFREQSCALE 256.0 /* Used by Oscg and Oscgaf */
 
-#endif UNITGENERATORS_H
+#endif /* UNITGENERATORS_H */
 
 #endif
