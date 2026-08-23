@@ -1946,16 +1946,16 @@ static double getNextMsgTime(MKConductor *aCond)
             curProc->_onQueue = NO;  // LMS this is neccessary but why?
             switch (curProc->_argCount) {
             case 0:
-                (*curProc->_methodImp)(curProc->_toObject, curProc->_aSelector);
+                ((void (*)(id, SEL))curProc->_methodImp)(curProc->_toObject, curProc->_aSelector);
                 break;
             case 1:
-                (*curProc->_methodImp)(curProc->_toObject, curProc->_aSelector, curProc->_arg1);
+                ((void (*)(id, SEL, id))curProc->_methodImp)(curProc->_toObject, curProc->_aSelector, curProc->_arg1);
 		if (curProc->_retainArg1)
 		    [curProc->_arg1 release];
 		curProc->_arg1 = nil;
                 break;
             case 2:
-                (*curProc->_methodImp)(curProc->_toObject, curProc->_aSelector, curProc->_arg1, curProc->_arg2);
+                ((void (*)(id, SEL, id, id))curProc->_methodImp)(curProc->_toObject, curProc->_aSelector, curProc->_arg1, curProc->_arg2);
 		if (curProc->_retainArg1)
 		    [curProc->_arg1 release];
 		if (curProc->_retainArg2)
@@ -2244,4 +2244,3 @@ static double getNextMsgTime(MKConductor *aCond)
 }
 
 @end
-

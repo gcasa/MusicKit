@@ -1,34 +1,47 @@
 #!/bin/sh
 
-echo "### Build MusicKit..."
+set -eu
 
-. ${GNUSTEP_MAKEFILES}/GNUstep.sh
+script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+cd "$script_dir"
 
-# Build DSP Native
-cd Frameworks
-cd MKDSP_Native
+if [ "$(uname -s)" = "Darwin" ]; then
+    configuration=${CONFIGURATION:-Development}
+    deployment_target=${MACOSX_DEPLOYMENT_TARGET:-13.0}
+    derived_data=${DERIVED_DATA_PATH:-"$script_dir/../.build/DerivedData"}
+
+    echo "### Configure MusicKit"
+    ./configure
+
+    for scheme in \
+        "Frameworks Only (Aggregate)" \
+        "Utilities Only (Aggregate)" \
+        "Examples Only (Aggregate)" \
+        "Applications Only (Aggregate)"
+    do
+        echo "### Build $scheme"
+        xcodebuild \
+            -project MusicKit.xcodeproj \
+            -scheme "$scheme" \
+            -configuration "$configuration" \
+            -derivedDataPath "$derived_data" \
+            CODE_SIGNING_ALLOWED=NO \
+            CONFIGURED_LIBS= \
+            DYLIB_INSTALL_NAME_BASE=@rpath \
+            'LD_RUNPATH_SEARCH_PATHS=@executable_path @executable_path/../../..' \
+            MACOSX_DEPLOYMENT_TARGET="$deployment_target" \
+            build
+    done
+
+    echo "### Products: $derived_data/Build/Products/$configuration"
+    exit 0
+fi
+
+if [ -z "${GNUSTEP_MAKEFILES:-}" ]; then
+    echo "GNUSTEP_MAKEFILES must be set for a GNUstep build" >&2
+    exit 1
+fi
+
+echo "### Build MusicKit with GNUstep"
+. "$GNUSTEP_MAKEFILES/GNUstep.sh"
 make debug=yes
-su -c ./install.sh
-
-# Build portaudio MIDI
-cd ..
-cd PlatformDependent
-cd MKPerformSndMIDI_portaudio
-make debug=yes
-su -c ./install.sh
-
-# Build SndKit
-cd ../..
-cd SndKit
-make debug=yes
-su -c ./install.sh
-
-# Build MusicKit
-cd ../
-cd MusicKit
-make debug=yes
-su -c ./install.sh
-
-echo "### Done"
-
-exit 0

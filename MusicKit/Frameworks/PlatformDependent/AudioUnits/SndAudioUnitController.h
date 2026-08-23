@@ -12,7 +12,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#import <Foundation/Foundation.h>
+#import <Cocoa/Cocoa.h>
 #import "SndAudioUnitProcessor.h"
 #import <AudioUnit/AudioUnitCarbonView.h>
 

@@ -77,7 +77,7 @@
 
 - newSpectrumLocation:(NSPoint *)p
 {
-    int cnt, count = [[NSApp delegate] documentCount] - 1;
+    int cnt, count = [(SpectroController *)[NSApp delegate] documentCount] - 1;
     if (count < 0) count = 7;
     
     cnt = (count > 3)? count - 4 : count;
@@ -88,7 +88,7 @@
 
 - newWaterfallLocation:(NSPoint *)p
 {
-    int cnt, count = [[NSApp delegate] documentCount] - 1;
+    int cnt, count = [(SpectroController *)[NSApp delegate] documentCount] - 1;
     if (count < 0) count = 7;
     
     cnt = (count > 3)? count - 4 : count;

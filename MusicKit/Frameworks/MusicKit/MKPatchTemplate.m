@@ -305,14 +305,15 @@ BOOL _MKIsClassInTemplate(MKPatchTemplate *templ, id factObj)
 void _MKEvalTemplateConnections(MKPatchTemplate *templ, id synthElements)
 {
     register unsigned n;
+    typedef id (*ConnectionIMP)(id, SEL, id);
 //    int arr=0; //arr[conn->_toObjectOffset], arr[conn->_argObjectOffset]
 //    id *arr = NX_ADDRESS(synthElements);
     NSArray *connectionStorage = templ->_connectionStorage;
 
     for (n = 0; n < [connectionStorage count]; n++) {
         register MKPatchConnection *conn = (MKPatchConnection *)([connectionStorage objectAtIndex: n]);
-        (*conn->_methodImp)([synthElements objectAtIndex: conn->_toObjectOffset], conn->_aSelector,
-                            [synthElements objectAtIndex: conn->_argObjectOffset]);
+        ((ConnectionIMP)conn->_methodImp)([synthElements objectAtIndex: conn->_toObjectOffset], conn->_aSelector,
+                                          [synthElements objectAtIndex: conn->_argObjectOffset]);
     }
 }
 
@@ -442,4 +443,3 @@ id _MKAllocSynthPatch(MKPatchTemplate *templ, id synthPatchClass, id anOrch, int
 }
 
 @end
-

@@ -125,7 +125,9 @@ static void initNeXTTimbres(void)
     int i, j;
     id p,partialsClass;
     MKTimbre *timbre;
-    IMP setAll,addObj; 
+    IMP setAll,addObj;
+    typedef id (*SetPartialsIMP)(id, SEL, int, short *, float *, double *, double);
+    typedef id (*AddWaveTableIMP)(id, SEL, id, double);
     struct synth *s, **ss;
     partialsClass = MKGetPartialsClass();
     setAll = [partialsClass instanceMethodForSelector:@selector(_setPartialNoCopyCount:freqRatios:ampRatios:
@@ -137,14 +139,14 @@ static void initNeXTTimbres(void)
 	for (j=0; j<mmm_table_lens[i]; j++) {
 	    p = [partialsClass new];
 	    s = ss[j];
-	    (*setAll)(p,
+	    ((SetPartialsIMP)setAll)(p,
 		      @selector(_setPartialNoCopyCount:freqRatios:ampRatios:
-			      phases:orDefaultPharse:),
+			      phases:orDefaultPhase:),
 		      (int) s->numharms,
-		      (int *) s->hrms,
+		      (short *) s->hrms,
 		      (float *) s->amps,
 		      NULL,0.0);
-	    (*addObj)(timbre,@selector(addWaveTable:forFreq:),p,
+	    ((AddWaveTableIMP)addObj)(timbre,@selector(addWaveTable:forFreq:),p,
 		      (double)s->frq);
 	}
     }
@@ -567,4 +569,3 @@ MKWaveTable *MKWaveTableForTimbreKey(NSString *key,
 }
 
 @end
-

@@ -199,6 +199,7 @@ static id readScorefile(MKScore *self, NSData *stream, double firstTimeTag, doub
     id rtnVal;
     unsigned int readPosition = 0;   // this is the top level.
     IMP partAddNote = [MKGetPartClass() instanceMethodForSelector: @selector(addNote:)];
+    typedef id (*AddNoteIMP)(id, SEL, id);
     
     p = _MKNewScoreInStruct(stream, self, self->scorefilePrintStream, NO, fileName, &readPosition);
     if (!p)
@@ -213,7 +214,7 @@ static id readScorefile(MKScore *self, NSData *stream, double firstTimeTag, doub
     while (p->timeTag <= lastTimeTag) {
 	if (aNote) {
 	    _MKNoteShiftTimeTag(aNote, timeShift);
-	    (*partAddNote)(p->part, @selector(addNote:), aNote);
+	    ((AddNoteIMP)partAddNote)(p->part, @selector(addNote:), aNote);
 	}
 	aNote = _MKParseScoreNote(p);/* not retained or autoreleased - so go careful */
 	if ((!aNote) && (p->timeTag > (MK_ENDOFTIME-1)))
@@ -1630,4 +1631,3 @@ static BOOL isUnarchiving = NO;
 }
 
 @end
-

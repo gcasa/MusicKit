@@ -450,9 +450,10 @@ static void unsetPartPerformers(MKScorePerformer *self)
     unsigned n = [partPerformers count], i;
     id anArray = [[NSMutableArray alloc] init];
     IMP addImp = [anArray methodForSelector: @selector(addObject:)];
+    typedef void (*AddObjectIMP)(id, SEL, id);
     
     for (i = 0; i < n; i++)
-        (*addImp)(anArray, @selector(addObject:), [[partPerformers objectAtIndex: i] noteSender]);
+        ((AddObjectIMP)addImp)(anArray, @selector(addObject:), [[partPerformers objectAtIndex: i] noteSender]);
     return [anArray autorelease];
 }
 

@@ -753,7 +753,7 @@ _MKMakeStrRealloc(str, newStrPtr)
     return *newStrPtr;
 }
 
-#if 0
+#if 1
 /* This should be left here, even though there is an inline version
  * in the header file.  (See compiler manual,which says:
  * This combination of inline and extern has almost the effect of a

@@ -10,3 +10,5 @@ derived_src
 *.log
 *.status
 *.cache
+.build/
+/MusicKit/Makefile

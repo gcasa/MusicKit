@@ -55,7 +55,7 @@
 
 - newSoundLocation: (NSPoint *) p
 {
-    int count = [[NSApp delegate] documentCount];
+    int count = [(SpectroController *)[NSApp delegate] documentCount];
     int cnt = (count > 3) ? count - 4 : count;
     
     p->x += (20.0 * count);

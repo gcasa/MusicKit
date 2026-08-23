@@ -43,12 +43,16 @@ int main (int argc, const char * argv[])
         NSString *filename = [NSString stringWithUTF8String: argv[argIndex]];
         Snd *snd;
         
-        if ([[filename pathExtension] isEqualToString: @"mp3"]) {
+        #if HAVE_HIP_DECODE_INIT
+        if ([[filename pathExtension] caseInsensitiveCompare: @"mp3"] == NSOrderedSame) {
             snd = [[SndMP3 alloc] initFromSoundfile: filename];
-       }
+        }
         else {
             snd = [[Snd alloc] initFromSoundfile: filename];
         }
+        #else
+        snd = [[Snd alloc] initFromSoundfile: filename];
+        #endif
         if(snd != nil) {
             printSoundReport(filename, snd);
         }

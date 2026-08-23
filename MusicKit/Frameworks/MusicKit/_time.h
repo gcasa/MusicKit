@@ -15,6 +15,8 @@ Modification history:
 #ifndef __MK__time_H___
 #define __MK__time_H___
 
+#include <objc/objc.h>
+
 /* Time offsets and conversions */
 extern void _MKSetConductedPerformance(BOOL yesOrNo,id conductorClass);
 extern double _MKLastTime();

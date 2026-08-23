@@ -312,7 +312,7 @@ static void removeNote(MKPart *self, MKNote *aNote);
     return val;
 }
 
-#define OBJECTATINDEX(_o,_x)  (*objectAtIndex)((_o), oaiSel, (_x))
+#define OBJECTATINDEX(_o,_x)  ((id (*)(id, SEL, NSUInteger))objectAtIndex)((_o), oaiSel, (_x))
 
 - (BOOL) isEqual:(MKPart *) anObject
 {
@@ -565,7 +565,7 @@ static void removeNote(MKPart *self, MKNote *aNote)
     int noteIndex, numOfNotes;
     SEL oaiSel = @selector(objectAtIndex:);
     IMP objectAtIndex;
-# define OBJECTATINDEX(x)  (*objectAtIndex)(noteList, oaiSel, (x))
+# define OBJECTATINDEX(x)  ((id (*)(id, SEL, NSUInteger))objectAtIndex)(noteList, oaiSel, (x))
     if (!noteList)
 	return self;
     objectAtIndex = [noteList methodForSelector: oaiSel];
@@ -601,7 +601,7 @@ static void removeNote(MKPart *self, MKNote *aNote)
     if (noteList == nil)
 	return nil;
     selfAddNote = [self methodForSelector: @selector(addNote:)];
-#   define SELFADDNOTE(x) (*selfAddNote)(self, @selector(addNote:), (x))
+#   define SELFADDNOTE(x) ((id (*)(id, SEL, id))selfAddNote)(self, @selector(addNote:), (x))
     
     alc = [noteList count];
     for (noteIndex = 0; noteIndex < alc; noteIndex++) {
@@ -651,12 +651,12 @@ static void removeNote(MKPart *self, MKNote *aNote)
 	int partsIndex, alc, pc;
 	
 	IMP objectAtIndex = [noteList methodForSelector: oaiSel];
-# define OBJECTATINDEX(x)  (*objectAtIndex)(noteList, oaiSel, (x))
+# define OBJECTATINDEX(x)  ((id (*)(id, SEL, NSUInteger))objectAtIndex)(noteList, oaiSel, (x))
 	IMP addPart = [parts methodForSelector:@selector(addObject:)];
-# define ADDPART(x) (*addPart)(parts, @selector(addObject:), (x))
+# define ADDPART(x) ((void (*)(id, SEL, id))addPart)(parts, @selector(addObject:), (x))
 	IMP partsIndexOfObjectIdenticalTo = [parts methodForSelector: @selector(indexOfObjectIdenticalTo:)];
-# define PARTSCONTAINSOBJECT(x) ( (NSUInteger)((*partsIndexOfObjectIdenticalTo)\
-					(parts, @selector(indexOfObjectIdenticalTo:), (x))) != NSNotFound )
+# define PARTSCONTAINSOBJECT(x) (((NSUInteger (*)(id, SEL, id))partsIndexOfObjectIdenticalTo)\
+					(parts, @selector(indexOfObjectIdenticalTo:), (x)) != NSNotFound)
 					    
 	suspendCompaction = YES;
 	alc = [noteList count];
@@ -682,7 +682,7 @@ static void removeNote(MKPart *self, MKNote *aNote)
 	int noteIndex, alc;
 	IMP selfAddNote = [self methodForSelector:@selector(addNote:)];
 	IMP objectAtIndex = [noteList methodForSelector: oaiSel];
-# define SELFADDNOTE(x) (*selfAddNote)(self, @selector(addNote:), (x))
+# define SELFADDNOTE(x) ((id (*)(id, SEL, id))selfAddNote)(self, @selector(addNote:), (x))
 	alc = [noteList count];
 	for (noteIndex = 0; noteIndex < alc; noteIndex++) {
 	    el = OBJECTATINDEX(noteIndex);
@@ -735,7 +735,7 @@ static void removeNote(MKPart *self, MKNote *aNote)
     MKNote  *mkn;
     SEL oaiSel = @selector(objectAtIndex:);
     IMP objectAtIndex = [noteList methodForSelector: oaiSel];
-# define OBJECTATINDEX(x)  (*objectAtIndex)(noteList, oaiSel, (x))
+# define OBJECTATINDEX(x)  ((id (*)(id, SEL, NSUInteger))objectAtIndex)(noteList, oaiSel, (x))
     int noteIndex, numOfNotes = [noteList count];
     
     for (noteIndex = 0 ; noteIndex < numOfNotes; noteIndex++) {
@@ -799,7 +799,7 @@ static void removeNote(MKPart *self, MKNote *aNote)
     BOOL bFound = FALSE;
     SEL oaiSel = @selector(objectAtIndex:);
     IMP objectAtIndex = [notes methodForSelector: oaiSel];
-# define OBJECTATINDEX(x)  (*objectAtIndex)(notes, oaiSel, (x))
+# define OBJECTATINDEX(x)  ((id (*)(id, SEL, NSUInteger))objectAtIndex)(notes, oaiSel, (x))
     
     numOfNotes = [notes count];
     for (noteIndex = 0; noteIndex < numOfNotes; noteIndex++) {
@@ -1176,4 +1176,3 @@ static void removeNote(MKPart *self, MKNote *aNote)
 }
 
 @end
-
