@@ -36,9 +36,9 @@ override the defaults. Optional MP3, Ogg/Vorbis, libsndfile, and streaming
 support is disabled when those third-party libraries are unavailable; native
 macOS audio and MIDI support remains enabled.
 
-## Installing ScorePlayer
+## Installing the applications
 
-Install ScorePlayer and its required frameworks with:
+Install all built legacy applications and their required frameworks with:
 
 ```sh
 ./install.sh

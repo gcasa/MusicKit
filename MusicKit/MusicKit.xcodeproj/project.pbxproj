@@ -855,6 +855,7 @@
 		D8A441F810777A7300E12376 /* SndAudioUnitProcessor.m in Sources */ = {isa = PBXBuildFile; fileRef = D8A441F410777A7300E12376 /* SndAudioUnitProcessor.m */; };
 		D8A442241077D58C00E12376 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8A442231077D58C00E12376 /* AudioToolbox.framework */; };
 		C0DE0001260823A000000001 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8A442231077D58C00E12376 /* AudioToolbox.framework */; };
+		C0DE0002260823A000000002 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8A442231077D58C00E12376 /* AudioToolbox.framework */; };
 		D8A4422A1077D5BF00E12376 /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8A442291077D5BF00E12376 /* AudioUnit.framework */; };
 		D8A442481077D6AF00E12376 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D8A442471077D6AF00E12376 /* Carbon.framework */; };
 		D8AE7A4406194279009D0112 /* SndViewPalette.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D8AE7A4306194279009D0112 /* SndViewPalette.tiff */; };
@@ -2381,6 +2382,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C0DE0002260823A000000002 /* AudioToolbox.framework in Frameworks */,
 				D847900307A8B01700F7C83A /* MKPerformSndMIDI.framework in Frameworks */,
 				D847900407A8B01700F7C83A /* SndKit.framework in Frameworks */,
 				D847900507A8B01700F7C83A /* MKDSP.framework in Frameworks */,

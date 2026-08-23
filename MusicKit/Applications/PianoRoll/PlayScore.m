@@ -4,8 +4,89 @@
 
 #import <Foundation/Foundation.h>
 #import <AppKit/AppKit.h>
+#import <AudioToolbox/AudioToolbox.h>
 #import <MusicKit/MusicKit.h>
 #import "PlayScore.h"
+
+@interface PianoRollAudioInstrument : MKInstrument {
+    UInt8 channel;
+    NSMutableDictionary *activeKeys;
+}
+- initWithProgram:(UInt8)program;
+- (void)stopTag:(NSNumber *)tag;
+@end
+
+static AUGraph pianoRollGraph;
+static AudioUnit pianoRollSynth;
+static UInt8 pianoRollNextChannel;
+
+static BOOL startPianoRollAudio(void)
+{
+    if (pianoRollGraph) return YES;
+    AudioComponentDescription output = {kAudioUnitType_Output, kAudioUnitSubType_DefaultOutput,
+                                        kAudioUnitManufacturer_Apple, 0, 0};
+    AudioComponentDescription synth = {kAudioUnitType_MusicDevice, kAudioUnitSubType_DLSSynth,
+                                       kAudioUnitManufacturer_Apple, 0, 0};
+    AUNode outputNode, synthNode;
+    OSStatus status = NewAUGraph(&pianoRollGraph);
+    if (!status) status = AUGraphAddNode(pianoRollGraph, &output, &outputNode);
+    if (!status) status = AUGraphAddNode(pianoRollGraph, &synth, &synthNode);
+    if (!status) status = AUGraphOpen(pianoRollGraph);
+    if (!status) status = AUGraphNodeInfo(pianoRollGraph, synthNode, NULL, &pianoRollSynth);
+    if (!status) status = AUGraphConnectNodeInput(pianoRollGraph, synthNode, 0, outputNode, 0);
+    if (!status) status = AUGraphInitialize(pianoRollGraph);
+    if (!status) status = AUGraphStart(pianoRollGraph);
+    if (!status) return YES;
+    NSLog(@"Unable to start PianoRoll audio (OSStatus %d)", (int)status);
+    if (pianoRollGraph) DisposeAUGraph(pianoRollGraph);
+    pianoRollGraph = NULL;
+    pianoRollSynth = NULL;
+    return NO;
+}
+
+@implementation PianoRollAudioInstrument
+- initWithProgram:(UInt8)program
+{
+    if ((self = [super init])) {
+        [self addNoteReceiver:[[[MKNoteReceiver alloc] init] autorelease]];
+        activeKeys = [[NSMutableDictionary alloc] init];
+        channel = pianoRollNextChannel++ % 16;
+        if (channel == 9) channel = pianoRollNextChannel++ % 16;
+        if (startPianoRollAudio())
+            MusicDeviceMIDIEvent(pianoRollSynth, 0xC0 | channel, program, 0, 0);
+    }
+    return self;
+}
+- (void)dealloc { [activeKeys release]; [super dealloc]; }
+- (void)stopTag:(NSNumber *)tag
+{
+    NSNumber *key = [activeKeys objectForKey:tag];
+    if (key) MusicDeviceMIDIEvent(pianoRollSynth, 0x80 | channel, [key intValue], 0, 0);
+    [activeKeys removeObjectForKey:tag];
+}
+- realizeNote:(MKNote *)note fromNoteReceiver:(MKNoteReceiver *)receiver
+{
+    NSNumber *tag = [NSNumber numberWithInt:[note noteTag]];
+    if ([note noteType] == MK_noteOff) { [self stopTag:tag]; return self; }
+    if ([note noteType] != MK_noteOn && [note noteType] != MK_noteDur) return self;
+    int key = [note keyNum];
+    int velocity = [note isParPresent:MK_velocity] ? [note parAsInt:MK_velocity] : 96;
+    if (key == MAXINT) key = 60;
+    key = MAX(0, MIN(127, key)); velocity = MAX(1, MIN(127, velocity));
+    MusicDeviceMIDIEvent(pianoRollSynth, 0x90 | channel, key, velocity, 0);
+    if ([note noteTag] == MAXINT) tag = [NSNumber numberWithInt:MKNoteTag()];
+    [activeKeys setObject:[NSNumber numberWithInt:key] forKey:tag];
+    if ([note noteType] == MK_noteDur)
+        [[note conductor] sel:@selector(stopTag:) to:self withDelay:[note dur] argCount:1, tag];
+    return self;
+}
+- afterPerformance
+{
+    if (pianoRollSynth) MusicDeviceMIDIEvent(pianoRollSynth, 0xB0 | channel, 123, 0, 0);
+    [activeKeys removeAllObjects];
+    return [super afterPerformance];
+}
+@end
 
 @implementation PlayScore:NSObject
 
@@ -33,7 +114,7 @@ static void handleMKError(NSString *msg)
 
 -(BOOL)isPlaying
 {
-    return (BOOL)(theOrch && [theOrch deviceStatus] == MK_devRunning);
+    return [MKConductor inPerformance];
 }
 
 - (void)setUpPlay: (MKScore *) scoreObj
@@ -75,13 +156,15 @@ static void handleMKError(NSString *msg)
 
     if ([self isPlaying])
     	[self stop];
-    theOrch = [[MKOrchestra alloc] initOnDSP: 0]; /* A noop if it exists */
+    theOrch = [[MKOrchestra alloc] initOnDSP: 0]; /* Retained for legacy non-macOS builds. */
 //    [theOrch setHeadroom:headroom];    /* Must be reset for each play */ 
     [theOrch setSamplingRate:samplingRate];
+    #if !defined(__APPLE__)
     if (![theOrch open]) {
 	NSRunAlertPanel(@"ScorePlayer", @"Can't open DSP. Perhaps another application has it.", @"OK", nil, nil);
 	return NO;
     }
+    #endif
     scorePerformer = [MKScorePerformer new];
     [scorePerformer setScore:scoreObj];
     [scorePerformer activate]; 
@@ -99,6 +182,13 @@ static void handleMKError(NSString *msg)
 	    continue;
 	}		
 	className = [partInfo parAsStringNoCopy:MK_synthPatch];
+        #if defined(__APPLE__)
+        anIns = [[PianoRollAudioInstrument alloc] initWithProgram:(UInt8)([className hash] % 128)];
+        [synthInstruments addObject:anIns];
+        [[partPerformer noteSender] connect:[anIns noteReceiver]];
+        [anIns release];
+        continue;
+        #endif
         synthPatchClass = [MKSynthPatch findPatchClass:className];
         
 	if (!synthPatchClass) {         /* Class not loaded in program? */ 
@@ -132,10 +222,14 @@ static void handleMKError(NSString *msg)
     MKSetDeltaT(1.0);
     [MKConductor setClocked:YES];     
 //    [MKOrchestra setTimed:YES];
+    #if !defined(__APPLE__)
     [MKConductor afterPerformanceSel:@selector(close) to:theOrch argCount:0];
+    #endif
 //    [MKConductor afterPerformanceSel:@selector(hello) to:self argCount:0];
 
+    #if !defined(__APPLE__)
     [theOrch run];
+    #endif
     [MKConductor startPerformance];
     return YES; 
 }
@@ -168,9 +262,10 @@ static void handleMKError(NSString *msg)
 //    [theOrch abort];
     [MKConductor finishPerformance];
     [MKConductor unlockPerformance];
+    #if !defined(__APPLE__)
     [theOrch close];
+    #endif
     return self;
 }
 
 @end
-
