@@ -37,12 +37,189 @@
  */   
 
 #import <AppKit/AppKit.h>
+#import <AudioToolbox/AudioToolbox.h>
 #import <Foundation/NSBundle.h>
 #import <MusicKit/MusicKit.h>
 
 #import "ErrorLog.h"
 #import "MKAlert.h"
 #import "ScorePlayerController.h"
+
+/*
+ * Modern Macs do not contain the Motorola 56001 DSP for which the original
+ * MKSynthInstrument implementation was written.  Use Apple's built-in DLS
+ * synthesizer as the real-time host-audio renderer for score parts instead.
+ */
+@interface ScorePlayerCoreAudioInstrument : MKInstrument
+{
+    UInt8 midiChannel;
+    NSMutableDictionary *keysByNoteTag;
+}
+- initWithProgram: (UInt8) program;
+- (void) stopNoteTag: (NSNumber *) noteTag;
+@end
+
+static AUGraph scorePlayerAudioGraph = NULL;
+static AudioUnit scorePlayerSynthUnit = NULL;
+static UInt8 scorePlayerNextMIDIChannel = 0;
+
+static BOOL StartScorePlayerAudioGraph(void)
+{
+    if (scorePlayerAudioGraph != NULL)
+        return YES;
+
+    AudioComponentDescription outputDescription = {
+        kAudioUnitType_Output, kAudioUnitSubType_DefaultOutput,
+        kAudioUnitManufacturer_Apple, 0, 0
+    };
+    AudioComponentDescription synthDescription = {
+        kAudioUnitType_MusicDevice, kAudioUnitSubType_DLSSynth,
+        kAudioUnitManufacturer_Apple, 0, 0
+    };
+    AUNode outputNode = 0;
+    AUNode synthNode = 0;
+    OSStatus status = NewAUGraph(&scorePlayerAudioGraph);
+    if (status == noErr) status = AUGraphAddNode(scorePlayerAudioGraph, &outputDescription, &outputNode);
+    if (status == noErr) status = AUGraphAddNode(scorePlayerAudioGraph, &synthDescription, &synthNode);
+    if (status == noErr) status = AUGraphOpen(scorePlayerAudioGraph);
+    if (status == noErr) status = AUGraphNodeInfo(scorePlayerAudioGraph, synthNode, NULL, &scorePlayerSynthUnit);
+    if (status == noErr) status = AUGraphConnectNodeInput(scorePlayerAudioGraph, synthNode, 0, outputNode, 0);
+    if (status == noErr) status = AUGraphInitialize(scorePlayerAudioGraph);
+    if (status == noErr) status = AUGraphStart(scorePlayerAudioGraph);
+    if (status == noErr)
+        return YES;
+
+    NSLog(@"Unable to start the Core Audio synthesizer (OSStatus %d)", (int) status);
+    if (scorePlayerAudioGraph != NULL)
+        DisposeAUGraph(scorePlayerAudioGraph);
+    scorePlayerAudioGraph = NULL;
+    scorePlayerSynthUnit = NULL;
+    return NO;
+}
+
+@implementation ScorePlayerCoreAudioInstrument
+
+- initWithProgram: (UInt8) program
+{
+    self = [super init];
+    if (self) {
+        [self addNoteReceiver: [[[MKNoteReceiver alloc] init] autorelease]];
+        keysByNoteTag = [[NSMutableDictionary alloc] init];
+        @synchronized([ScorePlayerCoreAudioInstrument class]) {
+            midiChannel = scorePlayerNextMIDIChannel++ % 16;
+            if (midiChannel == 9)
+                midiChannel = scorePlayerNextMIDIChannel++ % 16;
+            if (StartScorePlayerAudioGraph())
+                MusicDeviceMIDIEvent(scorePlayerSynthUnit, 0xC0 | midiChannel, program, 0, 0);
+        }
+    }
+    return self;
+}
+
+- (void) dealloc
+{
+    [keysByNoteTag release];
+    [super dealloc];
+}
+
+- (void) stopNoteTag: (NSNumber *) noteTag
+{
+    NSNumber *key = [keysByNoteTag objectForKey: noteTag];
+    if (key && scorePlayerSynthUnit) {
+        MusicDeviceMIDIEvent(scorePlayerSynthUnit, 0x80 | midiChannel, [key intValue], 0, 0);
+        [keysByNoteTag removeObjectForKey: noteTag];
+    }
+}
+
+- realizeNote: (MKNote *) note fromNoteReceiver: (MKNoteReceiver *) receiver
+{
+    if (!StartScorePlayerAudioGraph())
+        return nil;
+
+    NSNumber *tag = [NSNumber numberWithInt: [note noteTag]];
+    switch ([note noteType]) {
+        case MK_noteOn:
+        case MK_noteDur: {
+            int key = [note keyNum];
+            int velocity = [note isParPresent: MK_velocity] ? [note parAsInt: MK_velocity] : 96;
+            if (key == MAXINT) key = 60;
+            key = MAX(0, MIN(127, key));
+            velocity = MAX(1, MIN(127, velocity));
+            MusicDeviceMIDIEvent(scorePlayerSynthUnit, 0x90 | midiChannel, key, velocity, 0);
+            if ([note noteTag] != MAXINT)
+                [keysByNoteTag setObject: [NSNumber numberWithInt: key] forKey: tag];
+            if ([note noteType] == MK_noteDur) {
+                if ([note noteTag] == MAXINT)
+                    tag = [NSNumber numberWithInt: MKNoteTag()];
+                [keysByNoteTag setObject: [NSNumber numberWithInt: key] forKey: tag];
+                [[note conductor] sel: @selector(stopNoteTag:) to: self
+                               withDelay: [note dur] argCount: 1, tag];
+            }
+            break;
+        }
+        case MK_noteOff:
+            [self stopNoteTag: tag];
+            break;
+        default:
+            break;
+    }
+    return self;
+}
+
+- afterPerformance
+{
+    if (scorePlayerSynthUnit)
+        MusicDeviceMIDIEvent(scorePlayerSynthUnit, 0xB0 | midiChannel, 123, 0, 0);
+    [keysByNoteTag removeAllObjects];
+    return [super afterPerformance];
+}
+
+@end
+
+int ScorePlayerAudioSelfTest(void)
+{
+    if (!StartScorePlayerAudioGraph())
+        return 1;
+    MusicDeviceMIDIEvent(scorePlayerSynthUnit, 0x90, 69, 110, 0);
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.4, false);
+    MusicDeviceMIDIEvent(scorePlayerSynthUnit, 0x80, 69, 0, 0);
+    CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.1, false);
+    return 0;
+}
+
+int ScorePlayerPlayScoreFile(NSString *path)
+{
+    MKScore *score = [[MKScore alloc] init];
+    if (![score readScorefile: path]) {
+        [score release];
+        return 1;
+    }
+
+    MKScorePerformer *performer = [[MKScorePerformer alloc] init];
+    [performer setScore: score];
+    [performer activate];
+    NSMutableArray *instruments = [NSMutableArray array];
+    for (MKPartPerformer *partPerformer in [performer partPerformers]) {
+        MKNote *partInfo = [[partPerformer part] infoNote];
+        NSString *patchName = [partInfo isParPresent: MK_synthPatch]
+            ? [partInfo parAsStringNoCopy: MK_synthPatch] : @"piano";
+        ScorePlayerCoreAudioInstrument *instrument =
+            [[ScorePlayerCoreAudioInstrument alloc] initWithProgram: (UInt8)([patchName hash] % 128)];
+        [[partPerformer noteSender] connect: [instrument noteReceiver]];
+        [instruments addObject: instrument];
+        [instrument release];
+    }
+
+    [MKConductor useSeparateThread: YES];
+    [MKConductor setClocked: YES];
+    [MKConductor startPerformance];
+    while ([MKConductor inPerformance])
+        CFRunLoopRunInMode(kCFRunLoopDefaultMode, 0.05, false);
+
+    [performer release];
+    [score release];
+    return 0;
+}
 
 @implementation ScorePlayerController
 
@@ -761,6 +938,15 @@ static double getUntempo(float tempoVal)
             [[partPerformer noteSender] connect: [nonSynthInstrument noteReceiver]];
 	}
 	else {
+	#if defined(__APPLE__)
+	    /* Render legacy DSP synth-patch parts through the built-in macOS DLS synth. */
+	    UInt8 program = (UInt8) ([synthPatchName hash] % 128);
+	    ScorePlayerCoreAudioInstrument *anIns =
+	        [[ScorePlayerCoreAudioInstrument alloc] initWithProgram: program];
+	    [synthInstruments addObject: anIns];
+	    [[partPerformer noteSender] connect: [anIns noteReceiver]];
+	    [anIns release];
+	#else
 	    MKSynthInstrument *anIns;
 	    Class synthPatchClass = ([synthPatchName length]) ? [MKSynthPatch findPatchClass: synthPatchName] : nil;
 	    
@@ -789,6 +975,7 @@ static double getUntempo(float tempoVal)
 		if (!NSRunAlertPanel(STR_SCOREPLAYER, errMsg, STR_CONTINUE, STR_CANCEL, NULL))
 		    return;
 	    }
+	#endif
 	}
     }
     errorDuringPlayback = NO;
@@ -1003,7 +1190,7 @@ static void abortNow()
 
 - (BOOL) application: (NSApplication *) theApplication openFile: (NSString *) filename
 {
-    NSString *aType = [fileName pathExtension];
+    NSString *aType = [[filename pathExtension] lowercaseString];
     if (aType)
         if ([openFileExtensions indexOfObject: aType] == NSNotFound)
             return NO;
@@ -1312,4 +1499,3 @@ NSString *getPath(NSString *dir, NSString *name, NSString *ext)
 }
 
 @end
-

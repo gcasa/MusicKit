@@ -23,7 +23,27 @@ For example:
 open .build/DerivedData/Build/Products/Development/ScorePlayer.app
 ```
 
+ScorePlayer uses the built-in macOS DLS software synthesizer for legacy DSP
+score parts. Its audio path and score playback can be checked without the UI:
+
+```sh
+.build/DerivedData/Build/Products/Development/ScorePlayer.app/Contents/MacOS/ScorePlayer --audio-self-test
+.build/DerivedData/Build/Products/Development/ScorePlayer.app/Contents/MacOS/ScorePlayer --play-score MusicKit/Music/Scorefiles/Examp1.score
+```
+
 Set `CONFIGURATION` or `MACOSX_DEPLOYMENT_TARGET` in the environment to
 override the defaults. Optional MP3, Ogg/Vorbis, libsndfile, and streaming
 support is disabled when those third-party libraries are unavailable; native
 macOS audio and MIDI support remains enabled.
+
+## Installing ScorePlayer
+
+Install ScorePlayer and its required frameworks with:
+
+```sh
+./install.sh
+```
+
+The default destination is `~/Applications/MusicKit`. Pass a different
+destination as the first argument, or use `--skip-build` to install existing
+build products.

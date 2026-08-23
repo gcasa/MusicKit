@@ -3,7 +3,23 @@
 */
 
 #import <AppKit/AppKit.h>
+#include <string.h>
+
+extern int ScorePlayerAudioSelfTest(void);
+extern int ScorePlayerPlayScoreFile(NSString *path);
 
 int main(int argc, const char *argv[]) {
+    if (argc == 2 && strcmp(argv[1], "--audio-self-test") == 0) {
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        int result = ScorePlayerAudioSelfTest();
+        [pool drain];
+        return result;
+    }
+    if (argc == 3 && strcmp(argv[1], "--play-score") == 0) {
+        NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+        int result = ScorePlayerPlayScoreFile([NSString stringWithUTF8String: argv[2]]);
+        [pool drain];
+        return result;
+    }
     return NSApplicationMain(argc, argv);
 }
