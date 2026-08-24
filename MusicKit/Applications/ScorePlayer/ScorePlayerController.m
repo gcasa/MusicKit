@@ -695,6 +695,25 @@ static int fileType(NSString *name)
 
 static BOOL setUpFile(NSString *workspaceFileName);
 
+- (void) endOfTimeUI
+{
+    [tempoAnimator invalidate];
+    [tempoAnimator release];
+    tempoAnimator = nil;
+    [playButton setState: NSOffState];
+    [tooFastErrorMsg setTextColor: [NSColor lightGrayColor]];
+    [tooFastErrorMsg setBackgroundColor: [NSColor lightGrayColor]];
+    if (errorDuringPlayback && ![errorLog isVisible])
+	NSRunAlertPanel(STR_SCOREPLAYER, STR_ERRORS, STR_OK, nil, nil);
+    messageFlashed = NO;
+    isLate = NO;
+    wasLate = NO;
+    errorDuringPlayback = NO;
+    [theMainWindow setTitle: shortFileName];
+    [soundSavePanel close];
+    [self _enableMTCControls: YES];
+}
+
 - endOfTime	// called by the MusicKit thread
 {
     NSEnumerator *midiDevEnumerator = [playingMidiDevices objectEnumerator];
@@ -713,21 +732,9 @@ static BOOL setUpFile(NSString *workspaceFileName);
 	[theOrch setOutputSoundfile: NULL];
     }
     [theOrch setHostSoundOut: [soundOutDeviceName isEqualToString: NEXT_SOUND]];
-    [tempoAnimator invalidate];
-    [tempoAnimator release];
-    tempoAnimator = nil;
-    [playButton setState: NSOffState];
-    [tooFastErrorMsg setTextColor: [NSColor lightGrayColor]];
-    [tooFastErrorMsg setBackgroundColor: [NSColor lightGrayColor]];
-    if (errorDuringPlayback && ![errorLog isVisible])
-	NSRunAlertPanel(STR_SCOREPLAYER, STR_ERRORS, STR_OK, nil, nil);
-    messageFlashed = NO;
-    isLate = NO;
-    wasLate = NO;
-    errorDuringPlayback = NO;
-    [theMainWindow setTitle: shortFileName];
-    [soundSavePanel close];
-    [self _enableMTCControls: YES];
+    [self performSelectorOnMainThread: @selector(endOfTimeUI)
+                           withObject: nil
+                        waitUntilDone: NO];
     return self;
 }
 

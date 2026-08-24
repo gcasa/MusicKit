@@ -244,6 +244,12 @@
 
 - (void) haveFinishedPlaying
 {
+    if (![NSThread isMainThread]) {
+        [self performSelectorOnMainThread: @selector(haveFinishedPlaying)
+                               withObject: nil
+                            waitUntilDone: NO];
+        return;
+    }
     NSLog(@"...finished\n");
     [playButton setState: NSOffState];
     [pauseButton setEnabled: NO];    // we disable the pause button until we begin playing again.
